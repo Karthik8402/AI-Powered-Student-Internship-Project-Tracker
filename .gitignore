@@ -1,0 +1,25 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Dependencies
+vendor/
+node_modules/
+
+# Environment / Config (Optional, if you use .env file later)
+.env
+config.php
+
+# Logs
+logs/
+*.log
+
+# Build / Temp
+tmp/
+dist/
+
+# Uploads (Don't commit user uploaded files)
+public/uploads/
