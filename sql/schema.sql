@@ -20,21 +20,65 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 
+-- Table structure for table `teams`
+-- 
+CREATE TABLE IF NOT EXISTS `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `created_by` (`created_by`),
+  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 
+-- Table structure for table `team_members` (Many-to-Many: Teams <-> Students)
+-- 
+CREATE TABLE IF NOT EXISTS `team_members` (
+  `team_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `joined_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`team_id`, `user_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `team_members_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `team_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 
 -- Table structure for table `projects`
 -- 
 CREATE TABLE IF NOT EXISTS `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `assigned_to` int(11) DEFAULT NULL, -- Student ID
-  `mentor_id` int(11) DEFAULT NULL,   -- Mentor ID
+  `project_type` enum('individual','team','multi_student') NOT NULL DEFAULT 'individual',
+  `assigned_to` int(11) DEFAULT NULL,    -- Primary Student ID (for individual projects)
+  `team_id` int(11) DEFAULT NULL,        -- Team ID (for team projects)
+  `mentor_id` int(11) DEFAULT NULL,      -- Mentor ID
   `status` enum('pending','in_progress','completed','review') NOT NULL DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `assigned_to` (`assigned_to`),
   KEY `mentor_id` (`mentor_id`),
+  KEY `team_id` (`team_id`),
   CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `projects_ibfk_2` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  CONSTRAINT `projects_ibfk_2` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `projects_ibfk_3` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 
+-- Table structure for table `project_students` (Many-to-Many: Projects <-> Students for multi_student type)
+-- 
+CREATE TABLE IF NOT EXISTS `project_students` (
+  `project_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `added_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`project_id`, `user_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `project_students_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `project_students_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 
@@ -43,6 +87,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
 CREATE TABLE IF NOT EXISTS `tasks` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `project_id` int(11) NOT NULL,
+  `assigned_to` int(11) DEFAULT NULL,    -- Specific student (NULL = all project students)
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `status` enum('todo','in_progress','done') NOT NULL DEFAULT 'todo',
@@ -51,7 +96,9 @@ CREATE TABLE IF NOT EXISTS `tasks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `project_id` (`project_id`),
-  CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE
+  KEY `assigned_to` (`assigned_to`),
+  CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 
@@ -70,9 +117,18 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 
--- Seed Admin User (Default Password: password123)
+-- Add indexes for performance
 -- 
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
+ALTER TABLE `users` ADD INDEX IF NOT EXISTS `idx_role` (`role`);
+ALTER TABLE `projects` ADD INDEX IF NOT EXISTS `idx_status` (`status`);
+ALTER TABLE `projects` ADD INDEX IF NOT EXISTS `idx_project_type` (`project_type`);
+ALTER TABLE `tasks` ADD INDEX IF NOT EXISTS `idx_status` (`status`);
+
+-- 
+-- Seed Admin User (Default Password: password)
+-- 
+INSERT IGNORE INTO `users` (`name`, `email`, `password`, `role`) VALUES
 ('Admin User', 'admin@estar.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
 COMMIT;
+

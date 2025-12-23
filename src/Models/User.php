@@ -66,4 +66,46 @@ class User {
         }
         return false;
     }
+
+    // Find user by ID
+    public function findById($id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id LIMIT 0,1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if($row) {
+            $this->id = $row['id'];
+            $this->name = $row['name'];
+            $this->email = $row['email'];
+            $this->password = $row['password'];
+            $this->role = $row['role'];
+            $this->status = $row['status'];
+            return true;
+        }
+        return false;
+    }
+
+    // Update password
+    public function updatePassword($id, $newPassword) {
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        
+        $query = "UPDATE " . $this->table . " SET password = :password WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":password", $hashedPassword);
+        $stmt->bindParam(":id", $id, \PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    // Get all users by role (for dropdowns)
+    public function getAllByRole($role) {
+        $query = "SELECT id, name, email FROM " . $this->table . " WHERE role = :role AND status = 'active' ORDER BY name ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":role", $role);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

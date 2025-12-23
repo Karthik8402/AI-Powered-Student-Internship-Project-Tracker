@@ -32,7 +32,7 @@ class AuthController {
                     $_SESSION['last_activity'] = time();
 
                     // Redirect based on role
-                    header("Location: ./dashboard");
+                    header("Location: " . BASE_URL . "/dashboard");
                     exit;
                 } else {
                     $error = "Invalid password.";
@@ -76,7 +76,7 @@ class AuthController {
 
             if ($user->create()) {
                 // Auto login or redirect to login
-                header("Location: ./login?registered=true");
+                header("Location: " . BASE_URL . "/login?registered=true");
                 exit;
             } else {
                 $error = "Registration failed. Try again.";
@@ -87,7 +87,64 @@ class AuthController {
 
     public function logout() {
         session_destroy();
-        header("Location: ./login");
+        header("Location: " . BASE_URL . "/login");
         exit;
+    }
+
+    public function changePassword() {
+        // Render change password view
+        require ROOT_PATH . '/src/Views/auth/change-password.php';
+    }
+
+    public function handleChangePassword() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $currentPassword = $_POST['current_password'] ?? '';
+            $newPassword = $_POST['new_password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+
+            // Validation
+            if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                $error = "All fields are required.";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+                return;
+            }
+
+            if (strlen($newPassword) < 6) {
+                $error = "New password must be at least 6 characters.";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+                return;
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                $error = "New passwords do not match.";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+                return;
+            }
+
+            $user = new User();
+            
+            // Get current user
+            if (!$user->findById($_SESSION['user_id'])) {
+                $error = "User not found.";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+                return;
+            }
+
+            // Verify current password
+            if (!password_verify($currentPassword, $user->password)) {
+                $error = "Current password is incorrect.";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+                return;
+            }
+
+            // Update password
+            if ($user->updatePassword($_SESSION['user_id'], $newPassword)) {
+                $success = "Password changed successfully!";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+            } else {
+                $error = "Failed to update password. Please try again.";
+                require ROOT_PATH . '/src/Views/auth/change-password.php';
+            }
+        }
     }
 }

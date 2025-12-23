@@ -36,7 +36,7 @@
     </form>
 
     <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        Already have an account? <a href="./login" style="color: var(--primary);">Sign in</a>
+        Already have an account? <a href="<?php echo BASE_URL; ?>/login" style="color: var(--primary);">Sign in</a>
     </p>
 </div>
 

@@ -1,80 +1,158 @@
-# Student Internship and Project Tracker
+# 🎓 Student Internship & Project Tracker (eSTAR)
 
-An AI-powered web application for tracking student internships and projects, designed for Students, Mentors, and Admins.
+An AI-powered web application for tracking student internships and projects with role-based access for Students, Mentors, and Admins.
 
-## Features
-- **Role-Based Access**: Specialized dashboards for Students, Mentors, and Admins.
-- **Project Tracking**: Assign projects, track status, and view details.
-- **Task Management**: Create and update tasks with due dates.
-- **AI Assistant**: (Mock) AI suggestions for next steps based on project descriptions.
-- **Security**: Secure authentication, session management, and role validation.
-- **Audit Logging**: Tracks user activities.
+![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-5.7+-4479A1?logo=mysql&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+## ✨ Features
+
+### 🔐 Role-Based System
+| Role | Capabilities |
+|------|--------------|
+| **Student** | View assigned projects, update task status, see personal tasks only |
+| **Mentor** | Manage projects, assign tasks to students, view all student progress |
+| **Admin** | Full access, manage teams, users, and all projects |
+
+### 📋 Project Management
+- **Multi-Student Projects** - Assign multiple students to one project
+- **Team Projects** - Create teams and assign projects to entire teams
+- **Individual Projects** - Traditional single-student assignment
+
+### ✅ Task Management
+- Create tasks with due dates
+- Assign tasks to specific students or all team members
+- Students update their own task status (To Do → In Progress → Done)
+- Mentors/Admins view task progress (read-only)
+
+### 🤖 AI Assistant
+- Smart task suggestions based on project description and status
+- Contextual recommendations for web, mobile, API, and database projects
+
+### 🔒 Security
+- Bcrypt password hashing
+- Session-based authentication
+- Role-based access control
+- Prepared SQL statements (SQL injection prevention)
 
 ---
 
-## 🚀 How to Run Locally (Windows)
+## 🚀 Quick Start (XAMPP)
 
-Since you are on Windows, the easiest way to run PHP and MySQL is using **XAMPP**.
+### Prerequisites
+- [XAMPP](https://www.apachefriends.org/) with PHP 8.0+ and MySQL
+- Git
 
-### 1. Prerequisites
-- Download and install **[XAMPP](https://www.apachefriends.org/index.html)** (select PHP and MySQL).
-- Ensure Git is installed.
+### Installation
 
-### 2. Setup Database
-1. Open XAMPP Control Panel and Start **Apache** and **MySQL**.
-2. Go to `http://localhost/phpmyadmin` in your browser.
-3. Click **New** and create a database named `student_tracker`.
-4. Click on the new database, then go to the **Import** tab.
-5. Choose the file `sql/schema.sql` from this project and click **Go**.
-
-### 3. Configure Application
-1. Open `src/Config/Database.php`.
-2. Ensure the settings match your XAMPP MySQL defaults (usually `root` with no password):
-   ```php
-   private $host = 'localhost';
-   private $db_name = 'student_tracker';
-   private $username = 'root';
-   private $password = ''; // Leave empty for default XAMPP
+1. **Clone the repository**
+   ```bash
+   cd C:\xampp\htdocs
+   git clone https://github.com/YOUR_USERNAME/student-tracker.git
    ```
 
-### 4. Run the Application
+2. **Setup Database**
+   - Start Apache & MySQL in XAMPP Control Panel
+   - Open `http://localhost/phpmyadmin`
+   - Create database: `student_tracker`
+   - Import: `sql/schema.sql`
 
-**Option A: Using XAMPP (Recommended)**
-1. Copy the entire project folder to `C:\xampp\htdocs\student-tracker`.
-2. Open your browser and go to:
-   `http://localhost/student-tracker/public`
+3. **Configure Database** (if needed)
+   Edit `src/Config/Database.php` with your credentials
 
-**Option B: Using Built-in PHP Server**
-If you have added PHP to your system PATH:
-1. Open a terminal in the project root.
-2. Run:
-   ```powershell
-   php -S localhost:8000 -t public
+4. **Access the app**
    ```
-3. Visit `http://localhost:8000` in your browser.
+   http://localhost/student-tracker/public
+   ```
+
+### Default Login
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@estar.com` | `password` |
 
 ---
 
-## 🌐 How to Deploy to iPage
+## 📁 Project Structure
 
-1. **Upload Files**:
-   - Use File Manager or FTP (FileZilla) to upload the contents of `public/` to your `public_html` folder.
-   - Upload the `src/` folder to the same level (or securely inside `public_html`).
-   - *Note*: If you upload `src` inside `public_html`, ensure you protect it with `.htaccess` or move it outside the web root if possible.
-
-2. **Database Setup**:
-   - Log in to iPage Control Panel -> MySQL Database.
-   - Create a new database and user.
-   - Use **phpMyAdmin** on iPage to import `sql/schema.sql`.
-
-3. **Update Config**:
-   - Edit `src/Config/Database.php` on the server with your iPage database credentials.
+```
+student-tracker/
+├── public/                 # Web root (entry point)
+│   └── index.php           # Router
+├── src/
+│   ├── Config/             # Database configuration
+│   ├── Controllers/        # Request handlers
+│   ├── Models/             # Database models
+│   ├── Services/           # AI Service
+│   └── Views/              # PHP templates
+│       ├── auth/           # Login, Register, Change Password
+│       ├── dashboard/      # Role-specific dashboards
+│       ├── projects/       # Project CRUD views
+│       ├── tasks/          # Task views
+│       ├── teams/          # Team management
+│       └── layouts/        # Header, Footer
+└── sql/
+    ├── schema.sql          # Full database schema
+    └── migration_add_teams.sql  # Migration for existing DBs
+```
 
 ---
 
-## Default Login Credentials
-After importing `schema.sql`, an admin account is available:
-- **Email**: `admin@estar.com`
-- **Password**: `password123`
+## 🌐 Deployment (Shared Hosting)
 
-You can register new Student/Mentor accounts via the Sign-Up page.
+### For iPage, Hostinger, GoDaddy, etc.
+
+1. **Create MySQL Database** via cPanel
+2. **Import** `sql/schema.sql` via phpMyAdmin
+3. **Upload files** to `public_html/student-tracker/`
+4. **Update** `src/Config/Database.php` with server credentials
+5. **Access**: `https://yourdomain.com/student-tracker/public/`
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: PHP 8.0+ (MVC Architecture)
+- **Database**: MySQL 5.7+
+- **Frontend**: HTML, CSS (Glassmorphism UI), JavaScript
+- **Icons**: Font Awesome 6
+
+---
+
+## 📸 Screenshots
+
+### Dashboard (Role-Specific)
+- Student: Personal projects and tasks
+- Mentor: Student progress overview
+- Admin: System statistics
+
+### Project View
+- Project details with assigned students
+- Task list with status updates
+- AI-powered suggestions
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+**Karthik Kumar**
+
+---
+
+*Built with ❤️ for managing student internships and projects efficiently.*

@@ -123,14 +123,19 @@
 <body>
 
 <nav class="navbar glass-panel" style="border-radius: 0; border-left: 0; border-right: 0; border-top: 0;">
-    <a href="./login" class="nav-brand">Student Tracker</a>
+    <a href="<?php echo BASE_URL; ?>/dashboard" class="nav-brand">Student Tracker</a>
     <div class="nav-links">
         <?php if(isset($_SESSION['user_id'])): ?>
-            <a href="./dashboard" class="nav-item">Dashboard</a>
-            <a href="./logout" class="nav-item">Logout</a>
+            <a href="<?php echo BASE_URL; ?>/projects" class="nav-item"><i class="fa-solid fa-folder"></i> Projects</a>
+            <?php if($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'mentor'): ?>
+                <a href="<?php echo BASE_URL; ?>/teams" class="nav-item"><i class="fa-solid fa-people-group"></i> Teams</a>
+            <?php endif; ?>
+            <a href="<?php echo BASE_URL; ?>/dashboard" class="nav-item">Dashboard</a>
+            <a href="<?php echo BASE_URL; ?>/change-password" class="nav-item"><i class="fa-solid fa-key"></i> Change Password</a>
+            <a href="<?php echo BASE_URL; ?>/logout" class="nav-item">Logout</a>
         <?php else: ?>
-            <a href="./login" class="nav-item">Login</a>
-            <a href="./register" class="nav-btn">Sign Up</a>
+            <a href="<?php echo BASE_URL; ?>/login" class="nav-item">Login</a>
+            <a href="<?php echo BASE_URL; ?>/register" class="nav-btn">Sign Up</a>
         <?php endif; ?>
     </div>
 </nav>
