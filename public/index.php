@@ -1,4 +1,13 @@
 <?php
+// Session configuration for shared hosting
+$sessionPath = __DIR__ . '/sessions';
+if (!file_exists($sessionPath)) {
+    mkdir($sessionPath, 0777, true);
+}
+ini_set('session.save_path', $sessionPath);
+ini_set('session.cookie_path', '/KK/');
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
 session_start();
 
 // Define root path
@@ -30,7 +39,7 @@ spl_autoload_register(function ($class) {
 
 // Define BASE_URL for consistent absolute paths
 $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
-define('BASE_URL', $scriptDir === '/' || $scriptDir === '\\' ? '' : $scriptDir);
+define('BASE_URL', '/KK');
 
 // Simple Router (Can be expanded)
 $request_uri = $_SERVER['REQUEST_URI'];

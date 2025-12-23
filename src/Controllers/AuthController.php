@@ -24,15 +24,23 @@ class AuthController {
             $user = new User();
             if ($user->findByEmail($email)) {
                 if (password_verify($password, $user->password)) {
+                    // Regenerate session ID for security
+                    session_regenerate_id(true);
+                    
                     // Start Session
                     $_SESSION['user_id'] = $user->id;
                     $_SESSION['user_name'] = $user->name;
                     $_SESSION['user_role'] = $user->role;
                     $_SESSION['user_email'] = $user->email;
                     $_SESSION['last_activity'] = time();
+                    
+                    // Save session explicitly
+                    session_write_close();
 
-                    // Redirect based on role
-                    header("Location: " . BASE_URL . "/dashboard");
+                    // Redirect using JavaScript as fallback for shared hosting
+                    $dashboardUrl = BASE_URL . "/dashboard";
+                    echo "<script>window.location.href = '{$dashboardUrl}';</script>";
+                    echo "<noscript><meta http-equiv='refresh' content='0;url={$dashboardUrl}'></noscript>";
                     exit;
                 } else {
                     $error = "Invalid password.";

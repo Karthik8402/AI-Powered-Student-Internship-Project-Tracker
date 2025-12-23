@@ -117,12 +117,11 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 
--- Add indexes for performance
+-- Add indexes for performance (MySQL 5.7 compatible)
+-- Note: These may show warnings if indexes already exist, which is safe to ignore
 -- 
-ALTER TABLE `users` ADD INDEX IF NOT EXISTS `idx_role` (`role`);
-ALTER TABLE `projects` ADD INDEX IF NOT EXISTS `idx_status` (`status`);
-ALTER TABLE `projects` ADD INDEX IF NOT EXISTS `idx_project_type` (`project_type`);
-ALTER TABLE `tasks` ADD INDEX IF NOT EXISTS `idx_status` (`status`);
+-- DROP INDEX IF EXISTS not supported in 5.7, so we use CREATE INDEX without IF NOT EXISTS
+-- The schema already includes KEY definitions, so these are only for migration scenarios
 
 -- 
 -- Seed Admin User (Default Password: password)

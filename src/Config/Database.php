@@ -12,14 +12,46 @@ class Database {
     private $password;
     private $port;
     public $conn;
+    private static $instance = null;
 
     public function __construct() {
+        // Load .env file if it exists
+        $this->loadEnv();
+        
         // Load from environment variables with local defaults
         $this->host = getenv('DB_HOST') ?: 'localhost';
         $this->db_name = getenv('DB_NAME') ?: 'enviroapps_student_tracker';
         $this->username = getenv('DB_USER') ?: 'root';
         $this->password = getenv('DB_PASS') ?: '';
         $this->port = getenv('DB_PORT') ?: null;
+    }
+
+    private function loadEnv() {
+        // Try to find .env file in project root
+        $envPath = dirname(dirname(__DIR__)) . '/.env';
+        
+        if (file_exists($envPath)) {
+            $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                // Skip comments
+                if (strpos(trim($line), '#') === 0) {
+                    continue;
+                }
+                
+                // Parse KEY=VALUE
+                if (strpos($line, '=') !== false) {
+                    list($key, $value) = explode('=', $line, 2);
+                    $key = trim($key);
+                    $value = trim($value);
+                    
+                    // Remove quotes if present
+                    $value = trim($value, '"\'');
+                    
+                    // Set as environment variable
+                    putenv("$key=$value");
+                }
+            }
+        }
     }
 
     public function getConnection() {
