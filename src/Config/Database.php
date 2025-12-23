@@ -7,7 +7,7 @@ use PDOException;
 
 class Database {
     private $host = 'localhost';
-    private $db_name = 'student_tracker';
+    private $db_name = 'enviroapps_student_tracker';
     private $username = 'root';
     private $password = '';
     public $conn;
@@ -16,19 +16,18 @@ class Database {
         $this->conn = null;
 
         try {
-            // Check for environment variables (useful for production vs local)
-            $host = getenv('DB_HOST') ?: $this->host;
-            $db_name = getenv('DB_NAME') ?: $this->db_name;
-            $username = getenv('DB_USER') ?: $this->username;
-            $password = getenv('DB_PASS') ?: $this->password;
+            $this->conn = new PDO(
+                "mysql:host={$this->host};dbname={$this->db_name}",
+                $this->username,
+                $this->password
+            );
 
-            $this->conn = new PDO("mysql:host=" . $host . ";dbname=" . $db_name, $username, $password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->exec("set names utf8");
-        } catch(PDOException $exception) {
-            // In production, log this, don't echo it
-            error_log("Connection error: " . $exception->getMessage());
-            die("Database connection failed. Please check logs.");
+            $this->conn->exec("SET NAMES utf8");
+
+        } catch (PDOException $exception) {
+            // TEMPORARY: Show actual error for debugging
+            die("Database Error: " . $exception->getMessage());
         }
 
         return $this->conn;

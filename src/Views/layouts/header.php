@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Tracker | eSTAR</title>
+    <title>Student Tracker</title>
     <!-- Use Google Fonts for premium feel -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
@@ -123,14 +123,14 @@
 <body>
 
 <nav class="navbar glass-panel" style="border-radius: 0; border-left: 0; border-right: 0; border-top: 0;">
-    <a href="/" class="nav-brand">eSTAR Tracker</a>
+    <a href="./login" class="nav-brand">Student Tracker</a>
     <div class="nav-links">
         <?php if(isset($_SESSION['user_id'])): ?>
-            <a href="/dashboard" class="nav-item">Dashboard</a>
-            <a href="/logout" class="nav-item">Logout</a>
+            <a href="./dashboard" class="nav-item">Dashboard</a>
+            <a href="./logout" class="nav-item">Logout</a>
         <?php else: ?>
-            <a href="/login" class="nav-item">Login</a>
-            <a href="/register" class="nav-btn">Sign Up</a>
+            <a href="./login" class="nav-item">Login</a>
+            <a href="./register" class="nav-btn">Sign Up</a>
         <?php endif; ?>
     </div>
 </nav>

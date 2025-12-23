@@ -7,7 +7,7 @@
         <div class="alert"><?php echo $error; ?></div>
     <?php endif; ?>
 
-    <form action="/register" method="POST">
+    <form action="" method="POST">
         <div class="input-group">
             <label class="input-label">Full Name</label>
             <input type="text" name="name" class="form-control" placeholder="John Doe" required>
@@ -36,7 +36,7 @@
     </form>
 
     <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        Already have an account? <a href="/login" style="color: var(--primary);">Sign in</a>
+        Already have an account? <a href="./login" style="color: var(--primary);">Sign in</a>
     </p>
 </div>
 

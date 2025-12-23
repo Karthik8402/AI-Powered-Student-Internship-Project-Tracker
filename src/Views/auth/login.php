@@ -13,7 +13,7 @@
         </div>
     <?php endif; ?>
 
-    <form action="/login" method="POST">
+    <form action="" method="POST">
         <div class="input-group">
             <label class="input-label">Email Address</label>
             <input type="email" name="email" class="form-control" placeholder="student@example.com" required>
@@ -28,7 +28,7 @@
     </form>
 
     <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        Don't have an account? <a href="/register" style="color: var(--primary);">Sign up</a>
+        Don't have an account? <a href="./register" style="color: var(--primary);">Sign up</a>
     </p>
 </div>
 

@@ -32,7 +32,7 @@ class AuthController {
                     $_SESSION['last_activity'] = time();
 
                     // Redirect based on role
-                    header("Location: /dashboard");
+                    header("Location: ./dashboard");
                     exit;
                 } else {
                     $error = "Invalid password.";
@@ -76,7 +76,7 @@ class AuthController {
 
             if ($user->create()) {
                 // Auto login or redirect to login
-                header("Location: /login?registered=true");
+                header("Location: ./login?registered=true");
                 exit;
             } else {
                 $error = "Registration failed. Try again.";
@@ -87,7 +87,7 @@ class AuthController {
 
     public function logout() {
         session_destroy();
-        header("Location: /login");
+        header("Location: ./login");
         exit;
     }
 }

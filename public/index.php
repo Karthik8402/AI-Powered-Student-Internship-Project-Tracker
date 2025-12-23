@@ -2,7 +2,13 @@
 session_start();
 
 // Define root path
-define('ROOT_PATH', dirname(__DIR__));
+// Check if 'src' exists in the current directory (Shared Hosting / Flat Structure)
+if (is_dir(__DIR__ . '/src')) {
+    define('ROOT_PATH', __DIR__);
+} else {
+    // Default structure (public/ inside root)
+    define('ROOT_PATH', dirname(__DIR__));
+}
 
 // Autoloader (Simple psr-4 style for manual implementation without composer if needed, but we will use one)
 spl_autoload_register(function ($class) {
@@ -58,7 +64,7 @@ switch ($path) {
 
     case '/dashboard':
         if (!isset($_SESSION['user_id'])) {
-            header("Location: /login");
+            header("Location: ./login");
             exit;
         }
         $dashboard = new \App\Controllers\DashboardController();
