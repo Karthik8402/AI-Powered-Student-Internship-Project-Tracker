@@ -67,16 +67,28 @@ class Database {
                 $dsn .= ";port={$this->port}";
             }
             
+            // PDO options
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ];
+            
+            // Add SSL for TiDB Cloud (or any host requiring SSL)
+            $useSSL = getenv('DB_SSL') ?: 'false';
+            if ($useSSL === 'true' || $useSSL === '1') {
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
+                // Use system CA bundle - works on most Linux systems
+                $options[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
+            }
+            
             $this->conn = new PDO(
                 $dsn,
                 $this->username,
                 $this->password,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false
-                ]
+                $options
             );
+
 
         } catch (PDOException $exception) {
             // In production, log the error instead of displaying it
