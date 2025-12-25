@@ -148,5 +148,54 @@ class Task {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Count all pending (not done) tasks for a student
+    public function countPendingByUser($userId) {
+        return $this->countByStatusForUser($userId, ['todo', 'in_progress']);
+    }
+
+    // Count tasks by specific status(es) for a user
+    public function countByStatusForUser($userId, $statuses) {
+        if (!is_array($statuses)) {
+            $statuses = [$statuses];
+        }
+        
+        $statusPlaceholders = implode(',', array_fill(0, count($statuses), '?'));
+        
+        $query = "SELECT COUNT(DISTINCT t.id) as count
+                  FROM " . $this->table . " t 
+                  JOIN projects p ON t.project_id = p.id 
+                  LEFT JOIN project_students ps ON p.id = ps.project_id
+                  WHERE t.status IN ($statusPlaceholders)
+                    AND (
+                        t.assigned_to = ? 
+                        OR (t.assigned_to IS NULL AND (p.assigned_to = ? OR ps.user_id = ?))
+                    )";
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind status values first
+        $params = $statuses;
+        // Then bind user IDs
+        $params[] = $userId;
+        $params[] = $userId;
+        $params[] = $userId;
+        
+        $stmt->execute($params);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int) ($row['count'] ?? 0);
+    }
+
+    // Convenience methods for specific statuses
+    public function countTodoByUser($userId) {
+        return $this->countByStatusForUser($userId, 'todo');
+    }
+
+    public function countInProgressByUser($userId) {
+        return $this->countByStatusForUser($userId, 'in_progress');
+    }
+
+    public function countCompletedByUser($userId) {
+        return $this->countByStatusForUser($userId, 'done');
+    }
 }
 

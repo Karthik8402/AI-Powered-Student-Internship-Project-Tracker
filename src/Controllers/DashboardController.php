@@ -31,16 +31,15 @@ class DashboardController {
             $data['projects'] = $projectModel->getByStudent($userId);
             $data['recent_tasks'] = $taskModel->getRecentByUser($userId);
             
-            // Calculate stats
+            // Calculate stats - use task counts for task statuses
             $totalProjects = count($data['projects']);
             $completedProjects = count(array_filter($data['projects'], fn($p) => $p['status'] === 'completed'));
-            $pendingTasks = count(array_filter($data['recent_tasks'], fn($t) => $t['status'] !== 'done'));
             
             $data['stats'] = [
                 'total_projects' => $totalProjects,
-                'completed_projects' => $completedProjects,
-                'pending_tasks' => $pendingTasks,
-                'in_progress' => count(array_filter($data['projects'], fn($p) => $p['status'] === 'in_progress'))
+                'todo_tasks' => $taskModel->countTodoByUser($userId),
+                'in_progress_tasks' => $taskModel->countInProgressByUser($userId),
+                'completed_tasks' => $taskModel->countCompletedByUser($userId)
             ];
             
             if (!empty($data['projects'])) {

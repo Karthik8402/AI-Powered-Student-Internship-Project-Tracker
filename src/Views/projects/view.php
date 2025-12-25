@@ -105,11 +105,12 @@
             <div class="task-list">
                 <?php foreach($tasks as $task): ?>
                     <div class="task-item" data-id="<?php echo $task['id']; ?>">
-                        <div style="display: flex; align-items: center; gap: 1rem; flex-grow: 1;">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem; flex-grow: 1;">
                             <?php if($_SESSION['user_role'] === 'student'): ?>
                                 <!-- Students can change status -->
                                 <select class="task-status-select form-control" style="width: auto; padding: 0.4rem;" 
-                                        onchange="updateTaskStatus(<?php echo $task['id']; ?>, this.value)">
+                                        onchange="updateTaskStatus(<?php echo $task['id']; ?>, this.value)"
+                                        onclick="event.stopPropagation();">
                                     <option value="todo" <?php echo $task['status'] === 'todo' ? 'selected' : ''; ?>>To Do</option>
                                     <option value="in_progress" <?php echo $task['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
                                     <option value="done" <?php echo $task['status'] === 'done' ? 'selected' : ''; ?>>Done</option>
@@ -128,14 +129,22 @@
                                     <?php echo $statusLabels[$task['status']]; ?>
                                 </span>
                             <?php endif; ?>
-                            <div style="flex-grow: 1;">
-                                <div style="font-weight: 500; <?php echo $task['status'] === 'done' ? 'text-decoration: line-through; opacity: 0.6;' : ''; ?>">
-                                    <?php echo htmlspecialchars($task['title']); ?>
-                                    <?php if($task['is_ai_suggested']): ?>
-                                        <span style="color: var(--secondary); font-size: 0.75rem;"><i class="fa-solid fa-robot"></i></span>
-                                    <?php endif; ?>
+                            <div style="flex-grow: 1; cursor: pointer;" onclick="toggleTaskDescription(<?php echo $task['id']; ?>)">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fa-solid fa-chevron-right task-chevron" id="chevron-<?php echo $task['id']; ?>" style="font-size: 0.7rem; color: var(--text-muted); transition: transform 0.2s;"></i>
+                                    <span style="font-weight: 500; <?php echo $task['status'] === 'done' ? 'text-decoration: line-through; opacity: 0.6;' : ''; ?>">
+                                        <?php echo htmlspecialchars($task['title']); ?>
+                                        <?php if($task['is_ai_suggested']): ?>
+                                            <span style="color: var(--secondary); font-size: 0.75rem;"><i class="fa-solid fa-robot"></i></span>
+                                        <?php endif; ?>
+                                    </span>
                                 </div>
-                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <?php if(!empty($task['description'])): ?>
+                                    <div class="task-description" id="desc-<?php echo $task['id']; ?>" style="display: none; font-size: 0.85rem; color: var(--text-muted); margin: 0.5rem 0 0.5rem 1.2rem; line-height: 1.5; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                                        <?php echo nl2br(htmlspecialchars($task['description'])); ?>
+                                    </div>
+                                <?php endif; ?>
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-left: 1.2rem; margin-top: 0.25rem;">
                                     <?php if($task['due_date']): ?>
                                         <div style="font-size: 0.8rem; color: var(--text-muted);">
                                             <i class="fa-regular fa-calendar"></i> Due: <?php echo date('M d, Y', strtotime($task['due_date'])); ?>
@@ -208,6 +217,21 @@ function updateTaskStatus(taskId, status) {
             location.reload();
         }
     });
+}
+
+function toggleTaskDescription(taskId) {
+    const desc = document.getElementById('desc-' + taskId);
+    const chevron = document.getElementById('chevron-' + taskId);
+    
+    if (desc) {
+        if (desc.style.display === 'none') {
+            desc.style.display = 'block';
+            chevron.style.transform = 'rotate(90deg)';
+        } else {
+            desc.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
 }
 </script>
 

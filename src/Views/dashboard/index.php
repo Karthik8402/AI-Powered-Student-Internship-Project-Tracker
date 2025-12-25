@@ -28,7 +28,7 @@
         <?php if($role === 'student'): ?>
             <div class="glass-panel stat-card">
                 <div class="stat-icon" style="background: rgba(79, 70, 229, 0.2); color: #818cf8;">
-                    <i class="fa-solid fa-folder"></i>
+                    <i class="fa-solid fa-folder-open"></i>
                 </div>
                 <div class="stat-info">
                     <div class="stat-value"><?php echo $stats['total_projects']; ?></div>
@@ -36,29 +36,29 @@
                 </div>
             </div>
             <div class="glass-panel stat-card">
+                <div class="stat-icon" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value"><?php echo $stats['todo_tasks']; ?></div>
+                    <div class="stat-label">To Do</div>
+                </div>
+            </div>
+            <div class="glass-panel stat-card">
                 <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
                     <i class="fa-solid fa-spinner"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value"><?php echo $stats['in_progress']; ?></div>
+                    <div class="stat-value"><?php echo $stats['in_progress_tasks']; ?></div>
                     <div class="stat-label">In Progress</div>
                 </div>
             </div>
             <div class="glass-panel stat-card">
-                <div class="stat-icon" style="background: rgba(234, 179, 8, 0.2); color: #fbbf24;">
-                    <i class="fa-solid fa-list-check"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value"><?php echo $stats['pending_tasks']; ?></div>
-                    <div class="stat-label">Pending Tasks</div>
-                </div>
-            </div>
-            <div class="glass-panel stat-card">
                 <div class="stat-icon" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">
-                    <i class="fa-solid fa-check-circle"></i>
+                    <i class="fa-solid fa-circle-check"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value"><?php echo $stats['completed_projects']; ?></div>
+                    <div class="stat-value"><?php echo $stats['completed_tasks']; ?></div>
                     <div class="stat-label">Completed</div>
                 </div>
             </div>

@@ -2,70 +2,91 @@
 
 namespace App\Services;
 
+use App\Config\Config;
+
 class AIService {
     
-    // Simulate AI suggestion based on project context
-    public static function suggestNextTask($projectDescription, $status = 'pending') {
-        $description = strtolower($projectDescription ?? '');
+    private static $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+    
+    /**
+     * Generate an AI response using Google Gemini 1.5 Flash
+     */
+    public static function generateResponse($prompt) {
+        $apiKey = Config::get('GEMINI_API_KEY');
         
-        // Status-based suggestions
-        $statusSuggestions = [
-            'pending' => [
-                "Start by breaking down the project into smaller milestones.",
-                "Create a project roadmap with key deliverables and deadlines.",
-                "Schedule a kickoff meeting to align on project goals."
+        if (!$apiKey) {
+            error_log("Gemini API Key missing");
+            return null;
+        }
+
+        $data = [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
             ],
-            'in_progress' => [
-                "Review your current progress and update task statuses.",
-                "Document any blockers and seek mentor guidance if needed.",
-                "Consider a mid-project checkpoint to validate direction."
-            ],
-            'review' => [
-                "Prepare documentation for the review session.",
-                "Create a demo or presentation of completed features.",
-                "Compile a list of learnings and challenges faced."
-            ],
-            'completed' => [
-                "Write a final project report summarizing outcomes.",
-                "Archive project materials for future reference.",
-                "Reflect on what went well and areas for improvement."
+            'generationConfig' => [
+                'temperature' => 0.7,
+                'maxOutputTokens' => 300,
             ]
         ];
 
-        // Keyword-based suggestions
-        $keywordSuggestions = [
-            'web' => "Set up the frontend framework and create responsive layouts.",
-            'mobile' => "Design the app wireframes and define navigation flow.",
-            'api' => "Document the API endpoints and create a Postman collection.",
-            'database' => "Design the database schema and create ER diagrams.",
-            'machine learning' => "Gather and preprocess the training dataset.",
-            'react' => "Set up component structure and state management.",
-            'python' => "Create virtual environment and install dependencies."
-        ];
+        $ch = curl_init(self::$apiUrl . '?key=' . $apiKey);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-        // Check for keyword matches
-        foreach ($keywordSuggestions as $keyword => $suggestion) {
-            if (strpos($description, $keyword) !== false) {
-                return $suggestion;
-            }
+        $response = curl_exec($ch);
+        
+        if (curl_errno($ch)) {
+            error_log('Gemini API Error: ' . curl_error($ch));
+            curl_close($ch);
+            return null;
         }
-
-        // Fall back to status-based suggestion
-        $suggestions = $statusSuggestions[$status] ?? $statusSuggestions['pending'];
-        return $suggestions[array_rand($suggestions)];
+        
+        curl_close($ch);
+        
+        $result = json_decode($response, true);
+        
+        if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+            return trim($result['candidates'][0]['content']['parts'][0]['text']);
+        }
+        
+        error_log('Gemini API Response Error: ' . json_encode($result));
+        return null;
     }
 
-    // Generate task suggestions for a project
-    public static function suggestTasks($projectDescription) {
-        $description = strtolower($projectDescription ?? '');
-        
-        $suggestions = [
-            ["Research and document requirement specifications.", "Design the database schema.", "Create wireframes for the UI."],
-            ["Set up development environment.", "Create project repository.", "Define coding standards."],
-            ["Implement core features.", "Write unit tests.", "Conduct code review."]
-        ];
+    // Smart suggestion for pre-existing task based on project context
+    public static function suggestNextTask($projectDescription, $status = 'pending') {
+        // Fallback static suggestions if API fails
+        $fallback = self::getFallbackSuggestion($status);
 
-        return $suggestions[array_rand($suggestions)];
+        try {
+            $prompt = "You are a helpful project manager AI. Given the project description: '{$projectDescription}' and current status: '{$status}', suggest ONE single, short, complete sentence for the next task. Ensure it is actionable and grammatically complete. Do not use markdown or quotes.";
+            
+            $suggestion = self::generateResponse($prompt);
+            
+            if ($suggestion && !preg_match('/[.!?]$/', $suggestion)) {
+                 $suggestion .= '.';
+            }
+            
+            return $suggestion ?: $fallback;
+        } catch (\Exception $e) {
+            return $fallback;
+        }
+    }
+
+    private static function getFallbackSuggestion($status) {
+        $statusSuggestions = [
+            'pending' => "Break down project into milestones.",
+            'in_progress' => "Review progress and update blockers.",
+            'review' => "Prepare documentation for review.",
+            'completed' => "Write final project report."
+        ];
+        return $statusSuggestions[$status] ?? $statusSuggestions['pending'];
     }
 }
 
