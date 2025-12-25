@@ -34,11 +34,21 @@ define('BASE_URL', $scriptDir === '/' || $scriptDir === '\\' ? '' : $scriptDir);
 
 // Simple Router (Can be expanded)
 $request_uri = $_SERVER['REQUEST_URI'];
-$script_name = $_SERVER['SCRIPT_NAME'];
 
-// Remove script path from URI to get the internal route
-$path = str_replace(dirname($script_name), '', $request_uri);
-$path = parse_url($path, PHP_URL_PATH);
+// Parse the path - handle root directory case (Docker)
+if ($scriptDir === '/' || $scriptDir === '\\') {
+    // Script is at root, use REQUEST_URI directly
+    $path = parse_url($request_uri, PHP_URL_PATH);
+} else {
+    // Script is in a subdirectory, strip the directory prefix
+    $path = str_replace($scriptDir, '', $request_uri);
+    $path = parse_url($path, PHP_URL_PATH);
+}
+
+// Normalize empty path to /
+if (empty($path)) {
+    $path = '/';
+}
 
 // Route Handling
 $auth = new \App\Controllers\AuthController();
