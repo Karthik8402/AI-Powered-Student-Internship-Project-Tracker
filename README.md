@@ -98,17 +98,76 @@ student-tracker/
 
 ---
 
-## 🌐 Deployment (Shared Hosting)
+## 🌐 Deployment
 
-### For iPage, Hostinger, GoDaddy, etc.
+### Option 1: Render + TiDB Cloud (Recommended - Free)
+
+This setup supports the AI features (Gemini API calls) which are blocked on most shared hosting.
+
+#### Step 1: Setup TiDB Cloud Database
+
+1. Go to [TiDB Cloud](https://tidbcloud.com/) and Sign Up
+2. Click **Create Cluster** → **Serverless** (Free)
+3. Name it (e.g., `student-tracker-db`)
+4. Once created, click **Connect** to get credentials:
+   - Host (e.g., `gateway01.us-east-1.prod.aws.tidbcloud.com`)
+   - Port: `4000`
+   - User
+   - Password (set or generate one)
+
+5. **Initialize the Database:**
+   - Open **Chat2Query** or **SQL Editor** in TiDB
+   - First, select a database: `USE test;`
+   - Copy and run the contents of `sql/schema.sql`
+   - Then run `sql/migration_add_teams.sql`
+
+#### Step 2: Deploy to Render
+
+1. Go to [Render.com](https://render.com/) and Sign Up
+2. Click **New +** → **Web Service**
+3. Connect your GitHub repo
+4. Configure:
+   - **Name**: `student-tracker`
+   - **Runtime**: **Docker**
+   - **Instance Type**: **Free**
+   - **Root Directory**: Leave empty
+
+5. **Add Environment Variables:**
+
+   | Key | Value |
+   | :--- | :--- |
+   | `DB_HOST` | *(Your TiDB Host)* |
+   | `DB_PORT` | `4000` |
+   | `DB_USER` | *(Your TiDB User)* |
+   | `DB_PASS` | *(Your TiDB Password)* |
+   | `DB_NAME` | `test` |
+   | `DB_SSL` | `true` |
+   | `GEMINI_API_KEY` | *(Your Google Gemini API Key)* |
+
+6. Click **Create Web Service**
+
+#### Step 3: Access Your App
+
+Once deployed, your app will be available at:
+```
+https://your-app-name.onrender.com
+```
+
+> **Note:** Free tier may take 30-60 seconds to "wake up" on first request.
+
+---
+
+### Option 2: Shared Hosting (iPage, Hostinger, etc.)
+
+> ⚠️ **Note:** Most shared hosts block outgoing API calls, so AI features may not work.
 
 1. **Create MySQL Database** via cPanel
 2. **Import** `sql/schema.sql` via phpMyAdmin
 3. **Upload files** to `public_html/student-tracker/`
-4. **Update** `src/Config/Database.php` with server credentials
+4. **Create `.env` file** with database credentials
 5. **Access**: `https://yourdomain.com/student-tracker/public/`
 
----
+
 
 ## 🛠️ Tech Stack
 
